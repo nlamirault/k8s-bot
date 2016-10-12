@@ -28,7 +28,8 @@ type Client struct {
 	Clientset *kubernetes.Clientset
 }
 
-func NewKubernetesClient(kubeconfigPath string) (*Client, error) {
+// newKubernetesClient create new Kubernetes client using configuration from kubectl.
+func newKubernetesClient(kubeconfigPath string) (*Client, error) {
 	// uses the current context in kubeconfig
 	log.Printf("[DEBUG] Load Kubernetes configuration from %s", kubeconfigPath)
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
@@ -51,4 +52,28 @@ func (client *Client) GetServices() (*v1.ServiceList, error) {
 		return nil, err
 	}
 	return services, nil
+}
+
+func (client *Client) GetPods() (*v1.PodList, error) {
+	pods, err := client.Clientset.Core().Pods("").List(api.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return pods, nil
+}
+
+func (client *Client) GetNodes() (*v1.NodeList, error) {
+	nodes, err := client.Clientset.Core().Nodes().List(api.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return nodes, nil
+}
+
+func (client *Client) GetNamespaces() (*v1.NamespaceList, error) {
+	namespaces, err := client.Clientset.Core().Namespaces().List(api.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return namespaces, nil
 }

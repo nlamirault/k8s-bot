@@ -41,26 +41,20 @@ func main() {
 		os.Exit(0)
 	}
 
-	k8sclient, err := k8s.NewKubernetesClient(*kubeconfig)
+	k8sManager, err := k8s.NewKubernetesManager(*kubeconfig)
 	if err != nil {
-		log.Printf("[ERROR] Can't create Kubernetes client : %s", err)
+		log.Printf("[ERROR] Kubernetes failed: %s", err.Error())
 		os.Exit(1)
 	}
 
-	k8swatcher, err := k8s.NewKubernetesWatcher(k8sclient.Clientset)
-	if err != nil {
-		log.Printf("[ERROR] Can't create Kubernetes Watcher : %s", err)
-		os.Exit(1)
-	}
-
-	ircprovider, err := irc.NewProvider(fmt.Sprintf("%s:%d", *ircServer, *ircPort), *ircNick, *ircChannels)
+	ircprovider, err := irc.NewProvider(fmt.Sprintf("%s:%d", *ircServer, *ircPort), *ircNick, *ircChannels, k8sManager)
 	if err != nil {
 		log.Printf("[ERROR] Can't create IRC provider : %s", err)
 		os.Exit(1)
 	}
 
-	go k8swatcher.Watch()
 	go ircprovider.Receiver()
 	go ircprovider.Sender()
+	go ircprovider.Kubernetes.Watcher.Watch()
 	ircprovider.Conn.Loop()
 }

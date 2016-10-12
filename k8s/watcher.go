@@ -49,7 +49,7 @@ func createWatchers(clientset *kubernetes.Clientset) (watch.Interface, watch.Int
 	return podsWatcher, svcsWatcher, endpointWatcher, nil
 }
 
-func NewKubernetesWatcher(clientset *kubernetes.Clientset) (*Watcher, error) {
+func newKubernetesWatcher(clientset *kubernetes.Clientset) (*Watcher, error) {
 	podsWatcher, svcWatcher, endpointWatcher, err := createWatchers(clientset)
 	if err != nil {
 		return nil, err
