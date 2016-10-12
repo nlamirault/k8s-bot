@@ -1,0 +1,10 @@
+# Go
+k8s-bot
+
+# Files
+.DS_Store
+
+# Editor swap files
+*.swp
+*.swo
+*.swn
