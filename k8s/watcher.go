@@ -98,3 +98,11 @@ func (watcher *Watcher) Watch() {
 		}
 	}
 }
+
+func makeMessage(text string) messages.Message {
+	return messages.Message{
+		Room:       "",
+		ToUserName: "",
+		Message:    text,
+	}
+}

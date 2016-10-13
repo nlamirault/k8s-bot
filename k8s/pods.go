@@ -38,27 +38,15 @@ func managePodEvent(out chan messages.Message, eventType watch.EventType, pod *v
 	switch eventType {
 	case watch.Added:
 		log.Printf("[DEBUG] Add pod: %s\n", pod.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Pod added: %s", pod.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Pod added: %s", pod.Name))
 		out <- msg
 	case watch.Deleted:
 		log.Printf("[DEBUG] Deleted pod: %s\n", pod.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Pod deleted: %s", pod.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Pod deleted: %s", pod.Name))
 		out <- msg
 	case watch.Modified:
 		log.Printf("[DEBUG] Modified pod: %s\n", pod.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Pod modified: %s", pod.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Pod modified: %s", pod.Name))
 		out <- msg
 	}
 }

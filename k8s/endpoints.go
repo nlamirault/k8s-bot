@@ -38,27 +38,15 @@ func manageEndpointsEvent(out chan messages.Message, eventType watch.EventType, 
 	switch eventType {
 	case watch.Added:
 		log.Printf("[DEBUG] Add endpoint: %s\n", endpoints.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name))
 		out <- msg
 	case watch.Deleted:
 		log.Printf("[DEBUG] Deleted endpoint: %s\n", endpoints.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Endpoints deleted: %s", endpoints.Name))
 		out <- msg
 	case watch.Modified:
 		log.Printf("[DEBUG] Modified endpoint: %s\n", endpoints.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name))
 		out <- msg
 	}
 }

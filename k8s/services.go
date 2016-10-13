@@ -38,27 +38,15 @@ func manageServiceEvent(out chan messages.Message, eventType watch.EventType, se
 	switch eventType {
 	case watch.Added:
 		log.Printf("[DEBUG] Add service: %s\n", service.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Service added: %s", service.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Service added: %s", service.Name))
 		out <- msg
 	case watch.Deleted:
 		log.Printf("[DEBUG] Deleted service: %s\n", service.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Service deleted: %s", service.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Service added: %s", service.Name))
 		out <- msg
 	case watch.Modified:
 		log.Printf("[DEBUG] Modified service: %s\n", service.Name)
-		msg := messages.Message{
-			Room:       "",
-			ToUserName: "",
-			Message:    fmt.Sprintf("Kubernetes: Service modified: %s", service.Name),
-		}
+		msg := makeMessage(fmt.Sprintf("Kubernetes: Service modified: %s", service.Name))
 		out <- msg
 	}
 
