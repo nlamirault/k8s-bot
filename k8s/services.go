@@ -15,12 +15,15 @@
 package k8s
 
 import (
+	"fmt"
 	"log"
 
 	"k8s.io/client-go/1.4/kubernetes"
 	"k8s.io/client-go/1.4/pkg/api"
 	"k8s.io/client-go/1.4/pkg/api/v1"
 	"k8s.io/client-go/1.4/pkg/watch"
+
+	"github.com/nlamirault/k8s-bot/messages"
 )
 
 func createServicesWatcher(clientset *kubernetes.Clientset) (watch.Interface, error) {
@@ -31,15 +34,32 @@ func createServicesWatcher(clientset *kubernetes.Clientset) (watch.Interface, er
 	return watcher, nil
 }
 
-func manageServiceEvent(eventType watch.EventType, service *v1.Service) {
+func manageServiceEvent(out chan messages.Message, eventType watch.EventType, service *v1.Service) {
 	switch eventType {
 	case watch.Added:
-		log.Printf("[INFO] Add service: %s\n", service.Name)
+		log.Printf("[DEBUG] Add service: %s\n", service.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Service added: %s", service.Name),
+		}
+		out <- msg
 	case watch.Deleted:
-		log.Printf("[INFO] Deleted service: %s\n", service.Name)
+		log.Printf("[DEBUG] Deleted service: %s\n", service.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Service deleted: %s", service.Name),
+		}
+		out <- msg
 	case watch.Modified:
-		log.Printf("[INFO] Modified service: %s\n", service.Name)
-
+		log.Printf("[DEBUG] Modified service: %s\n", service.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Service modified: %s", service.Name),
+		}
+		out <- msg
 	}
 
 }

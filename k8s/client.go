@@ -28,8 +28,8 @@ type Client struct {
 	Clientset *kubernetes.Clientset
 }
 
-// newKubernetesClient create new Kubernetes client using configuration from kubectl.
-func newKubernetesClient(kubeconfigPath string) (*Client, error) {
+// NewKubernetesClient create new Kubernetes client using configuration from kubectl.
+func NewKubernetesClient(kubeconfigPath string) (*Client, error) {
 	// uses the current context in kubeconfig
 	log.Printf("[DEBUG] Load Kubernetes configuration from %s", kubeconfigPath)
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)

@@ -14,29 +14,29 @@
 
 package k8s
 
-import (
-	"log"
-)
+// import (
+// 	"log"
+// )
 
-// Manager define a Kubernetes manager
-type Manager struct {
-	Client  *Client
-	Watcher *Watcher
-}
+// // Manager define a Kubernetes manager
+// type Manager struct {
+// 	Client  *Client
+// 	Watcher *Watcher
+// }
 
-func NewKubernetesManager(kubeconfigPath string) (*Manager, error) {
-	log.Printf("[INFO] Create the Kubernetes manager")
-	client, err := newKubernetesClient(kubeconfigPath)
-	if err != nil {
-		return nil, err
-	}
+// func NewKubernetesManager(kubeconfigPath string, out chan messages.Message) (*Manager, error) {
+// 	log.Printf("[INFO] Create the Kubernetes manager")
+// 	client, err := newKubernetesClient(kubeconfigPath)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	watcher, err := newKubernetesWatcher(client.Clientset)
-	if err != nil {
-		return nil, err
-	}
-	return &Manager{
-		Client:  client,
-		Watcher: watcher,
-	}, nil
-}
+// 	watcher, err := newKubernetesWatcher(client.Clientset, out)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &Manager{
+// 		Client:  client,
+// 		Watcher: watcher,
+// 	}, nil
+// }

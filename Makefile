@@ -47,7 +47,7 @@ MAKE_COLOR=\033[33;01m%-20s\033[0m
 MAIN = github.com/nlamirault/k8s-bot
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 PKGS = $(shell glide novendor)
-EXE = $(shell ls k8s-bot-${VERSION}_*)
+EXE = $(shell ls k8s-bot-*_*)
 
 PACKAGE=$(APP)-$(VERSION)
 ARCHIVE=$(PACKAGE).tar

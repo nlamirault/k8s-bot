@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package messages
 
-// Version represents the application version using SemVer
-const Version string = "0.2.0"
+type Message struct {
+	Room         string
+	FromUserName string
+	ToUserName   string
+	Message      string
+}

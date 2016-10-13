@@ -15,12 +15,15 @@
 package k8s
 
 import (
+	"fmt"
 	"log"
 
 	"k8s.io/client-go/1.4/kubernetes"
 	"k8s.io/client-go/1.4/pkg/api"
 	"k8s.io/client-go/1.4/pkg/api/v1"
 	"k8s.io/client-go/1.4/pkg/watch"
+
+	"github.com/nlamirault/k8s-bot/messages"
 )
 
 func createEndpointsWatcher(clientset *kubernetes.Clientset) (watch.Interface, error) {
@@ -31,14 +34,31 @@ func createEndpointsWatcher(clientset *kubernetes.Clientset) (watch.Interface, e
 	return watcher, nil
 }
 
-func manageEndpointsEvent(eventType watch.EventType, endpoints *v1.Endpoints) {
+func manageEndpointsEvent(out chan messages.Message, eventType watch.EventType, endpoints *v1.Endpoints) {
 	switch eventType {
 	case watch.Added:
-		log.Printf("[INFO] Add endpoint: %s\n", endpoints.Name)
+		log.Printf("[DEBUG] Add endpoint: %s\n", endpoints.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name),
+		}
+		out <- msg
 	case watch.Deleted:
-		log.Printf("[INFO] Deleted endpoint: %s\n", endpoints.Name)
+		log.Printf("[DEBUG] Deleted endpoint: %s\n", endpoints.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name),
+		}
+		out <- msg
 	case watch.Modified:
-		log.Printf("[INFO] Modified endpoint: %s\n", endpoints.Name)
-
+		log.Printf("[DEBUG] Modified endpoint: %s\n", endpoints.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Endpoints added: %s", endpoints.Name),
+		}
+		out <- msg
 	}
 }

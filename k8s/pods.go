@@ -15,12 +15,15 @@
 package k8s
 
 import (
+	"fmt"
 	"log"
 
 	"k8s.io/client-go/1.4/kubernetes"
 	"k8s.io/client-go/1.4/pkg/api"
 	"k8s.io/client-go/1.4/pkg/api/v1"
 	"k8s.io/client-go/1.4/pkg/watch"
+
+	"github.com/nlamirault/k8s-bot/messages"
 )
 
 func createPodsWatcher(clientset *kubernetes.Clientset) (watch.Interface, error) {
@@ -31,13 +34,31 @@ func createPodsWatcher(clientset *kubernetes.Clientset) (watch.Interface, error)
 	return watcher, nil
 }
 
-func managePodEvent(eventType watch.EventType, pod *v1.Pod) {
+func managePodEvent(out chan messages.Message, eventType watch.EventType, pod *v1.Pod) {
 	switch eventType {
 	case watch.Added:
-		log.Printf("[INFO] Add pod: %s\n", pod.Name)
+		log.Printf("[DEBUG] Add pod: %s\n", pod.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Pod added: %s", pod.Name),
+		}
+		out <- msg
 	case watch.Deleted:
-		log.Printf("[INFO] Deleted pod: %s\n", pod.Name)
+		log.Printf("[DEBUG] Deleted pod: %s\n", pod.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Pod deleted: %s", pod.Name),
+		}
+		out <- msg
 	case watch.Modified:
-		log.Printf("[INFO] Modified pod: %s\n", pod.Name)
+		log.Printf("[DEBUG] Modified pod: %s\n", pod.Name)
+		msg := messages.Message{
+			Room:       "",
+			ToUserName: "",
+			Message:    fmt.Sprintf("Kubernetes: Pod modified: %s", pod.Name),
+		}
+		out <- msg
 	}
 }

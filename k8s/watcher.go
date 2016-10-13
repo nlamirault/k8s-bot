@@ -21,6 +21,8 @@ import (
 	// "k8s.io/client-go/1.4/pkg/api"
 	"k8s.io/client-go/1.4/pkg/api/v1"
 	"k8s.io/client-go/1.4/pkg/watch"
+
+	"github.com/nlamirault/k8s-bot/messages"
 )
 
 // Watcher define a Kubernetes watching resources
@@ -28,6 +30,7 @@ type Watcher struct {
 	Pods      watch.Interface
 	Services  watch.Interface
 	Endpoints watch.Interface
+	Out       chan messages.Message
 }
 
 func createWatchers(clientset *kubernetes.Clientset) (watch.Interface, watch.Interface, watch.Interface, error) {
@@ -49,7 +52,7 @@ func createWatchers(clientset *kubernetes.Clientset) (watch.Interface, watch.Int
 	return podsWatcher, svcsWatcher, endpointWatcher, nil
 }
 
-func newKubernetesWatcher(clientset *kubernetes.Clientset) (*Watcher, error) {
+func NewKubernetesWatcher(clientset *kubernetes.Clientset, out chan messages.Message) (*Watcher, error) {
 	podsWatcher, svcWatcher, endpointWatcher, err := createWatchers(clientset)
 	if err != nil {
 		return nil, err
@@ -58,6 +61,7 @@ func newKubernetesWatcher(clientset *kubernetes.Clientset) (*Watcher, error) {
 		Pods:      podsWatcher,
 		Services:  svcWatcher,
 		Endpoints: endpointWatcher,
+		Out:       out,
 	}, nil
 }
 
@@ -68,19 +72,19 @@ func (watcher *Watcher) listen() bool {
 			return false
 		}
 		pod := ev.Object.(*v1.Pod)
-		managePodEvent(ev.Type, pod)
+		managePodEvent(watcher.Out, ev.Type, pod)
 	case ev, ok := <-watcher.Services.ResultChan():
 		if !ok {
 			return false
 		}
 		svc := ev.Object.(*v1.Service)
-		manageServiceEvent(ev.Type, svc)
+		manageServiceEvent(watcher.Out, ev.Type, svc)
 	case ev, ok := <-watcher.Endpoints.ResultChan():
 		if !ok {
 			return false
 		}
 		endpoints := ev.Object.(*v1.Endpoints)
-		manageEndpointsEvent(ev.Type, endpoints)
+		manageEndpointsEvent(watcher.Out, ev.Type, endpoints)
 	}
 	return true
 

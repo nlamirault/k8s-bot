@@ -23,11 +23,12 @@ import (
 	ircevent "github.com/thoj/go-ircevent"
 
 	"github.com/nlamirault/k8s-bot/k8s"
+	"github.com/nlamirault/k8s-bot/messages"
 	"github.com/nlamirault/k8s-bot/version"
 )
 
 var (
-	messages = map[string]string{
+	staticMessages = map[string]string{
 		"Help": `You can use the following commands:
         !help     : Display help message
         !version  : Show bot version
@@ -36,28 +37,21 @@ var (
 	}
 )
 
-type Message struct {
-	Room         string
-	FromUserName string
-	ToUserName   string
-	Message      string
-}
-
 type Provider struct {
 	channels   []string
 	Conn       *ircevent.Connection
-	in         chan Message
-	out        chan Message
-	Kubernetes *k8s.Manager
+	in         chan messages.Message
+	Out        chan messages.Message
+	Kubernetes *k8s.Client
 }
 
-func NewProvider(server string, nick string, channels string, k8smanager *k8s.Manager) (*Provider, error) {
+func NewProvider(server string, nick string, channels string, k8sclient *k8s.Client) (*Provider, error) {
 	log.Printf("[DEBUG] IRC Provider using: %s %s %s", server, nick, channels)
 	provider := &Provider{
 		channels:   strings.Split(channels, ","),
-		in:         make(chan Message),
-		out:        make(chan Message),
-		Kubernetes: k8smanager,
+		in:         make(chan messages.Message),
+		Out:        make(chan messages.Message),
+		Kubernetes: k8sclient,
 	}
 	ircConn := ircevent.IRC(nick, nick)
 	ircConn.AddCallback(
@@ -71,7 +65,7 @@ func NewProvider(server string, nick string, channels string, k8smanager *k8s.Ma
 
 	ircConn.AddCallback("PRIVMSG", func(e *ircevent.Event) {
 		log.Printf("[DEBUG] IRC Message: %s", e)
-		msg := Message{
+		msg := messages.Message{
 			Room:         e.Arguments[0],
 			FromUserName: e.Nick,
 			Message:      e.Message(),
@@ -88,31 +82,35 @@ func NewProvider(server string, nick string, channels string, k8smanager *k8s.Ma
 
 func (p *Provider) Receiver() {
 	for inMsg := range p.in {
-		log.Printf("[INFO] Manage incomming message: %s", inMsg)
+		log.Printf("[INFO] IRC  message: %s", inMsg)
 		var buffer bytes.Buffer
 		if strings.Contains(inMsg.Message, "!version") {
 			buffer.WriteString(fmt.Sprintf("v%s", version.Version))
 		} else if strings.Contains(inMsg.Message, "!help") {
-			buffer.WriteString(messages["Help"])
+			buffer.WriteString(staticMessages["Help"])
 		} else if strings.Contains(inMsg.Message, "!k8s") {
 			buffer = p.dispatchKubernetesCommand(inMsg.Message)
 		} else {
 			buffer.WriteString("Sorry, unknown command.")
 		}
-		outMsg := Message{
+		outMsg := messages.Message{
 			Room:       inMsg.Room,
 			ToUserName: inMsg.FromUserName,
 			Message:    buffer.String(),
 		}
-		p.out <- outMsg
+		p.Out <- outMsg
 	}
 }
 
 func (p *Provider) Sender() {
-	for msg := range p.out {
+	for msg := range p.Out {
+		log.Printf("[DEBUG] IRC Output message: %s", msg)
 		channel := msg.Room
 		if p.Conn.GetNick() == msg.Room {
 			channel = msg.FromUserName
+		}
+		if channel == "" {
+			channel = p.channels[0]
 		}
 
 		var finalMsg bytes.Buffer
@@ -127,7 +125,7 @@ func (p *Provider) Sender() {
 func (p *Provider) dispatchKubernetesCommand(msg string) bytes.Buffer {
 	var buffer bytes.Buffer
 	if strings.Contains(msg, ":services") {
-		services, err := p.Kubernetes.Client.GetServices()
+		services, err := p.Kubernetes.GetServices()
 		if err != nil {
 			buffer.WriteString(fmt.Sprintf("Kubernetes error: %s", err.Error()))
 		} else {
@@ -138,7 +136,7 @@ func (p *Provider) dispatchKubernetesCommand(msg string) bytes.Buffer {
 		}
 
 	} else if strings.Contains(msg, ":pods") {
-		pods, err := p.Kubernetes.Client.GetPods()
+		pods, err := p.Kubernetes.GetPods()
 		if err != nil {
 			buffer.WriteString(fmt.Sprintf("Kubernetes error: %s", err.Error()))
 		} else {
@@ -148,7 +146,7 @@ func (p *Provider) dispatchKubernetesCommand(msg string) bytes.Buffer {
 			}
 		}
 	} else if strings.Contains(msg, ":nodes") {
-		nodes, err := p.Kubernetes.Client.GetNodes()
+		nodes, err := p.Kubernetes.GetNodes()
 		if err != nil {
 			buffer.WriteString(fmt.Sprintf("Kubernetes error: %s", err.Error()))
 		} else {
@@ -159,7 +157,7 @@ func (p *Provider) dispatchKubernetesCommand(msg string) bytes.Buffer {
 		}
 
 	} else if strings.Contains(msg, ":namespaces") {
-		namespaces, err := p.Kubernetes.Client.GetPods()
+		namespaces, err := p.Kubernetes.GetPods()
 		if err != nil {
 			buffer.WriteString(fmt.Sprintf("Kubernetes error: %s", err.Error()))
 		} else {
