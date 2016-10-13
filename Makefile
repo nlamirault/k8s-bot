@@ -108,7 +108,7 @@ coverage: ## Launch code coverage
 
 gox: ## Make all binaries
 	@echo -e "$(OK_COLOR)[$(APP)] Create binaries $(NO_COLOR)"
-	$(GOX) $(GOX_ARGS) github.com/zeiot/k8s-bot
+	$(GOX) $(GOX_ARGS) github.com/nlamirault/k8s-bot
 
 .PHONY: binaries
 binaries: ## Upload all binaries
